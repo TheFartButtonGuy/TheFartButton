@@ -11,7 +11,7 @@ body {
     width: 100vw;
     min-height: 160px;
     min-width: 120px;
-    overflow: scroll;
+    overflow: hidden;
 }
 main {
     width: 100%;
