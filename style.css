@@ -1,0 +1,85 @@
+@font-face {
+    font-family: "Mochi Boom DEMO";
+    src: url(./mochi-boom-demo.regular.ttf);
+}
+
+body {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    min-height: 160px;
+    min-width: 120px;
+    overflow: scroll;
+}
+main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+main .button-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+#button-position {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+#the-fart-button {
+    z-index: 100;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 8px 0 #880000, 0 15px 20px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    outline: none;
+    cursor: pointer;
+    color: transparent;
+}
+#the-fart-button:hover {
+    background: linear-gradient(to bottom, #ee0000 0%, #bb0000 100%);
+}
+#the-fart-button:active {
+    box-shadow: 0 4px 0 #880000, 0 8px 6px rgba(0, 0, 0, 0.4);
+    transform: translateY(4px);
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    font-size: 2em;
+    font-family: "Mochi Boom DEMO", Tahoma, sans-serif;
+}
+footer span {
+    font-weight: bold;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+.fart-element {
+    position: absolute;
+    font-family: "Mochi Boom DEMO", Tahoma, sans-serif;
+    color: brown;
+    font-size: 1.5em;
+    top: 50%;
+    left: 50%;
+    transform: translateX(50%) translateY(50%);
+    animation: fadeOutAtTheEnd 1s forwards;
+}
+
+@keyframes fadeOutAtTheEnd {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
