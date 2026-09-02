@@ -1,5 +1,11 @@
 "use strict";
 
+// Disable double click for mobile losers
+document.addEventListener("dblclick", (evt) => {
+    evt.preventDefault();
+    console.log("prevented");
+}, false)
+
 function getRandomInt(min, max) {
     min = min || 0;
     max = max || min + 1;
