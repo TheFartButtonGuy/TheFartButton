@@ -47,6 +47,7 @@ main .button-container {
     outline: none;
     cursor: pointer;
     color: transparent;
+    touch-action: manipulation;
 }
 #the-fart-button:hover {
     background: linear-gradient(to bottom, #ee0000 0%, #bb0000 100%);
