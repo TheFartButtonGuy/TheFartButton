@@ -10,6 +10,17 @@ function setNewRandomizeLolTrigger() {
     randomizeLolTrigger = getRandomInt(3, 9);
 }
 
+function throwNewAudioElement() {
+    let newAudioElmt = document.createElement("audio");
+    newAudioElmt.setAttribute("src", "./sounds/fart.mp3");
+    newAudioElmt.addEventListener("ended", () => {
+        document.body.removeChild(newAudioElmt);
+    });
+
+    document.body.appendChild(newAudioElmt);
+    newAudioElmt.play();
+}
+
 function throwNewFartElement(innerTxt) {
 
     let theta = getRandomInt(0,360);
@@ -78,7 +89,7 @@ let randomizeLolTrigger = 42;
 
 const theFartButtonContainerElmt = document.getElementById("button-position");
 const theFartButtonElmt = document.getElementById("the-fart-button");
-const fartCounterSpan = document.getElementById('total-fart-counter');
+const fartCounterSpan = document.getElementById("total-fart-counter");
 
 setNewRandomizeLolTrigger();
 
@@ -90,6 +101,7 @@ theFartButtonElmt.addEventListener("click", () => {
         nextLolTriggerCounter = 0;
         setNewRandomizeLolTrigger();
     } else {
+        throwNewAudioElement();
         nextLolTriggerCounter++;
         totalFartCount++;
         fartCounterSpan.innerText = totalFartCount;
