@@ -12,7 +12,10 @@ function setNewRandomizeLolTrigger() {
 
 function throwNewAudioElement() {
     let newAudioElmt = document.createElement("audio");
-    newAudioElmt.setAttribute("src", "./sounds/fart.mp3");
+    let fartNumber = getRandomInt(1, 19);
+    console.log("Fart number: ", fartNumber);
+    newAudioElmt.setAttribute("src", `./sounds/fart${fartNumber}.mp3`);
+    // newAudioElmt.setAttribute("src", `./sounds/fart11.mp3`);
     newAudioElmt.addEventListener("ended", () => {
         document.body.removeChild(newAudioElmt);
     });
