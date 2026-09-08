@@ -10,12 +10,22 @@ function setNewRandomizeLolTrigger() {
     randomizeLolTrigger = getRandomInt(3, 9);
 }
 
-function throwNewAudioElement() {
+function throwNewAudioElement(type = "fart") {
     let newAudioElmt = document.createElement("audio");
-    let fartNumber = getRandomInt(1, 19);
-    console.log("Fart number: ", fartNumber);
-    newAudioElmt.setAttribute("src", `./sounds/fart${fartNumber}.mp3`);
-    // newAudioElmt.setAttribute("src", `./sounds/fart11.mp3`);
+
+    if (type == "fart") {
+        let fartNumber = getRandomInt(1, 19);
+        newAudioElmt.setAttribute("src", `./sounds/fart${fartNumber}.mp3`);
+    } else if (type == "diarrhea") {
+        let fartNumber = getRandomInt(1, 2) == 1 ? 1 : 3;
+        newAudioElmt.setAttribute("src", `./sounds/explosive_diarrhea${fartNumber}.mp3`);
+    } else if (type == "big") {
+        let fartNumber = getRandomInt(1, 6);
+        newAudioElmt.setAttribute("src", `./sounds/big_fart${fartNumber}.mp3`);
+    } else if (type == "substancial") {
+        let fartNumber = getRandomInt(1, 3);
+        newAudioElmt.setAttribute("src", `./sounds/substancial_fart${fartNumber}.mp3`);
+    }
     newAudioElmt.addEventListener("ended", () => {
         document.body.removeChild(newAudioElmt);
     });
@@ -25,6 +35,7 @@ function throwNewAudioElement() {
 }
 
 function throwNewFartElement(innerTxt) {
+    console.log("throw new fart element with innertxt:", innerTxt);
 
     let theta = getRandomInt(0,360);
     let thetaRadiant = theta * Math.PI/180; // Math.sin and Math.cos expect radiant, not degrees
@@ -86,17 +97,40 @@ function throwNewFartElement(innerTxt) {
     }, 1000);
 }
 
-let totalFartCount = 0;
+let totalFartCount = +localStorage.getItem("totalFartCount") || 0;
 let nextLolTriggerCounter = 0;
 let randomizeLolTrigger = 42;
 
 const theFartButtonContainerElmt = document.getElementById("button-position");
 const theFartButtonElmt = document.getElementById("the-fart-button");
 const fartCounterSpan = document.getElementById("total-fart-counter");
+const expValueSpan = document.getElementById("exp-value-container");
+const fartLoaderProgressBar = document.getElementById("fart-loader-progress-bar");
+const scene = document.getElementById("scene");
+
+fartCounterSpan.innerText = totalFartCount;
 
 setNewRandomizeLolTrigger();
 
-theFartButtonElmt.addEventListener("click", () => {
+
+let longMousePress = false;
+let cancelClickEvent = false;
+let currentTimeOut;
+let fartOverloadTimeout;
+let currentFartValue = 0;
+
+function handleClickEventOnFartButton() {
+    console.log("Click event is now handle");
+    theFartButtonElmt.addEventListener("click", clickEventOnFartButtonCallback);
+}
+
+function clickEventOnFartButtonCallback() {
+    console.log("Click event! Will handle? ", !longMousePress);
+    if(longMousePress) {
+        longMousePress = false;
+        return;
+    } 
+
     let logText = "*prout*";
 
     if (nextLolTriggerCounter == randomizeLolTrigger) {
@@ -108,7 +142,136 @@ theFartButtonElmt.addEventListener("click", () => {
         nextLolTriggerCounter++;
         totalFartCount++;
         fartCounterSpan.innerText = totalFartCount;
+        localStorage.setItem("totalFartCount", +totalFartCount);
     }
 
     throwNewFartElement(logText);
-})
+}
+
+handleClickEventOnFartButton();
+
+function handleMouseLongPress() {
+    console.log("handleMouseLongPress", currentFartValue);
+    fartLoaderProgressBar.style.top = "100%";
+    fartLoaderProgressBar.className = "";
+
+    let logText = "*prout*";
+
+    if(currentFartValue > 50) {
+        console.log("currentFartValue > 50");
+
+        totalFartCount += Math.round(currentFartValue);
+        fartCounterSpan.innerText = totalFartCount;
+        localStorage.setItem("totalFartCount", +totalFartCount);
+
+        if (currentFartValue > 80) {
+            // Substancial fart
+            console.log("currentFartValue > 80, go for substancial");
+            logText = "*substancial fart*";
+            throwNewAudioElement("substancial");
+        } else {
+            console.log("Should be a big fart");
+            // big fart
+            logText = "*big fart*";
+            throwNewAudioElement("big");
+        }
+    } else {
+
+        // normal fart
+        if (nextLolTriggerCounter == randomizeLolTrigger) {
+            logText = "lol";
+            nextLolTriggerCounter = 0;
+            setNewRandomizeLolTrigger();
+        } else {
+            throwNewAudioElement();
+            nextLolTriggerCounter++;
+            totalFartCount++;
+            fartCounterSpan.innerText = totalFartCount;
+            localStorage.setItem("totalFartCount", +totalFartCount);
+        }
+    }
+
+    console.log("Logtext there bro:", logText);
+    throwNewFartElement(logText);
+
+    currentFartValue = 0;
+}
+
+theFartButtonElmt.addEventListener("mousedown", () => {
+    console.log("Mouse down event");
+
+    // Wait 400ms before considering the mousedown
+    currentTimeOut = setTimeout(() => {
+        longMousePress = true;
+        mouseDownHandler();
+    }, 400);
+});
+
+theFartButtonElmt.addEventListener("mouseleave", () => {
+    clearTimeout(currentTimeOut);
+    clearTimeout(fartOverloadTimeout);
+
+    if (longMousePress) {
+        longMousePress = false;
+        console.log("mouseleave");
+        handleMouseLongPress();
+    }
+});
+
+theFartButtonElmt.addEventListener("mouseup", () => {
+    clearTimeout(currentTimeOut);
+    clearTimeout(fartOverloadTimeout);
+
+    if (longMousePress) {
+        console.log("mouseup");
+        setTimeout(handleMouseLongPress, 0)
+    }
+});
+
+function mouseDownHandler(currentValue = 0) {
+    currentFartValue = Math.round(Math.exp(++currentValue / 30) * 100) / 100;
+    let fartOverload = false;
+
+    if(currentFartValue >= 80) {
+        fartOverload = true;
+        fartLoaderProgressBar.className = "fart-overloading";
+    }
+
+    if (currentFartValue >= 100) {
+        currentFartValue = 100;
+        clearTimeout(currentTimeOut);
+
+        fartOverloadTimeout = setTimeout(() => {
+            throwNewAudioElement("diarrhea");
+            scene.innerHTML = `<div class="poop">
+
+                <div class="poop-layer layer-1"></div>
+                <div class="poop-layer layer-2"></div>
+                <div class="poop-layer layer-3"></div>
+                <div class="poop-layer layer-4"></div>
+
+            </div>`;
+
+            let listPoop = document.getElementsByClassName("poop-layer");
+
+            setTimeout(() => {
+                for (let i = 0; i < listPoop.length; i++) {
+                    let currentPoopLayer = listPoop[i];
+                    console.log(`Poop ${i}`, currentPoopLayer);
+
+                    currentPoopLayer.addEventListener("click", (evt) => {
+                        evt.stopPropagation();
+                        console.log(evt.target);
+                    }, false);
+                }
+            }, 0);
+        }, 500)
+    } else {
+        currentTimeOut = setTimeout(() => {
+            mouseDownHandler(currentValue);
+        }, 10)
+    }
+
+    expValueSpan.innerText = currentFartValue;
+    fartLoaderProgressBar.style.top = 100 - currentFartValue + "%";
+}
