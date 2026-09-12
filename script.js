@@ -10,9 +10,11 @@ function setNewRandomizeLolTrigger() {
     randomizeLolTrigger = getRandomInt(3, 9);
 }
 
+// TODO change function name "throw" -> "launch" (throw is for error)
 function throwNewAudioElement(type = "fart") {
     let newAudioElmt = document.createElement("audio");
 
+    // TODO use switch statement
     if (type == "fart") {
         let fartNumber = getRandomInt(1, 19);
         newAudioElmt.setAttribute("src", `./sounds/fart${fartNumber}.mp3`);
@@ -25,7 +27,11 @@ function throwNewAudioElement(type = "fart") {
     } else if (type == "substancial") {
         let fartNumber = getRandomInt(1, 3);
         newAudioElmt.setAttribute("src", `./sounds/substancial_fart${fartNumber}.mp3`);
+    } else if (type == "rick") {
+        newAudioElmt.setAttribute("src", "./sounds/rickroll.mp3");
     }
+
+    // Automatically remove the audio element when it has fully played
     newAudioElmt.addEventListener("ended", () => {
         document.body.removeChild(newAudioElmt);
     });
@@ -80,6 +86,7 @@ function throwNewFartElement(innerTxt) {
     newDiv.className = "fart-element";
     newDiv.style.transform = "translateX(-50%) translateY(-50%) rotate(" + theta + "deg)";
 
+    // TODO use === instead of ==
     if(innerTxt == "lol") {
         newDiv.style.fontSize = "2.2em";
         newDiv.style.color = "black";
@@ -275,3 +282,17 @@ function mouseDownHandler(currentValue = 0) {
     expValueSpan.innerText = currentFartValue;
     fartLoaderProgressBar.style.top = 100 - currentFartValue + "%";
 }
+
+// Konami Code
+const rickElement = document.getElementById('rick');
+const konamiHandler = new Konami(() => {
+    konamiHandler.unload();
+    console.log('Konami thrown and unloaded');
+    rickElement.className = "show";
+    throwNewAudioElement("rick");
+    setTimeout(() => {
+        konamiHandler.load()
+        rickElement.className = "hide";
+        console.log('Konami reloaded');
+    }, 22000);
+})
