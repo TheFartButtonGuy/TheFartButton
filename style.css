@@ -28,12 +28,6 @@ body {
         animation: fartPoliceBackground .4s infinite;
     }
 }
-#exp-value-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    font-size: 5em;
-}
 #fart-loader-container {
     position: absolute;
     right: 10px;
@@ -186,15 +180,12 @@ footer span {
 
 .poop {
     position: absolute;
-
+    z-index: 200;
     left: 50%;
     top: 50%;
-
-    width: 240px;
+    width: 440px;
     height: 190px;
-
     transform: translate(-50%, -50%);
-
     filter: drop-shadow(0 8px 4px rgba(0,0,0,.15));
 }
 
@@ -204,11 +195,8 @@ footer span {
  */
 .poop-layer {
     position: absolute;
-
     background: #75451f;
-
     transform: scale(0);
-
     transform-origin: center 20%;
 }
 
@@ -325,4 +313,50 @@ footer span {
 @keyframes rickSlideUp {
     0% { top: 100%; }
     100% { top: 0%; }
+}
+
+/* Gradient Border — made with Image FX · https://cssimagelab.com/effects/gradient-border */
+@property --ifx-border-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes ifx-gradient-border-spin { to { --ifx-border-angle: 360deg; } }
+#game-over {
+    --ifx-c1: #e01b24;
+    --ifx-c2: #f6d32d;
+    --ifx-speed: 1s;
+    --ifx-thick: 12px;
+    --ifx-radius: 20px;
+
+    position: absolute;
+    z-index: 500;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    transition: transform .4s ease-in;
+    transform: scale(0);
+    display: block;
+    overflow: visible;
+    border-radius: var(--ifx-radius, 4px);
+
+    &.show {
+        transform: scale(1);
+    }
+
+    &::before {
+        content: ""; position: absolute; inset: calc(-1 * var(--ifx-thick, 3px)); z-index: -1;
+        border-radius: inherit;
+        background: conic-gradient(from var(--ifx-border-angle), var(--ifx-c1, #e5c07b), var(--ifx-c2, #6db3ff), var(--ifx-c1, #e5c07b));
+        animation: ifx-gradient-border-spin var(--ifx-speed, 6s) linear infinite;
+    }
+
+    > div {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        flex-direction: column;
+        position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+        background-color: var(--ifx-c2, orange);
+        border-radius: 12px;
+        transition: transform var(--ifx-duration, 500ms) var(--ifx-ease, cubic-bezier(.2,.6,.2,1)),
+                    filter var(--ifx-duration, 500ms) var(--ifx-ease, ease);
+    }
 }

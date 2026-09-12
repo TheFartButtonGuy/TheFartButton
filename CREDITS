@@ -1,3 +1,7 @@
 - Fart sounds come from https://fart-sounds.com
 - Font use is Mochi Boom Demo https://www.1001fonts.com/mochi-boom-demo-font.html
 - This article https://www.tutorialpedia.org/blog/css-arcade-button/ helped creating the arcade button
+- The Konami Code is handle thanks to this George Mandis project https://github.com/georgemandis/konami-js/blob/main/konami.js that I slightly modified
+- Rick Astley sound is a mix of those 2 sounds: https://soundinstants.com/sound/rickroll-short and https://soundinstants.com/sound/rickroll-button
+- Rick Astley GIF comes from there: https://github.com/ExploreWithCode/rickroll
+- Game over panel effect is made with Image FX · https://cssimagelab.com/effects/gradient-border

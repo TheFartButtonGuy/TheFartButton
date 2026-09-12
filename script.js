@@ -1,49 +1,12 @@
-"use strict";
-
-function getRandomInt(min, max) {
-    min = min || 0;
-    max = max || min + 1;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import { Konami } from "./konami.js";
+import { getRandomInt, getRandomFloat, playSound } from "./utils.js";
 
 function setNewRandomizeLolTrigger() {
     randomizeLolTrigger = getRandomInt(3, 9);
 }
 
-// TODO change function name "throw" -> "launch" (throw is for error)
-function throwNewAudioElement(type = "fart") {
-    let newAudioElmt = document.createElement("audio");
-
-    // TODO use switch statement
-    if (type == "fart") {
-        let fartNumber = getRandomInt(1, 19);
-        newAudioElmt.setAttribute("src", `./sounds/fart${fartNumber}.mp3`);
-    } else if (type == "diarrhea") {
-        let fartNumber = getRandomInt(1, 2) == 1 ? 1 : 3;
-        newAudioElmt.setAttribute("src", `./sounds/explosive_diarrhea${fartNumber}.mp3`);
-    } else if (type == "big") {
-        let fartNumber = getRandomInt(1, 6);
-        newAudioElmt.setAttribute("src", `./sounds/big_fart${fartNumber}.mp3`);
-    } else if (type == "substancial") {
-        let fartNumber = getRandomInt(1, 3);
-        newAudioElmt.setAttribute("src", `./sounds/substancial_fart${fartNumber}.mp3`);
-    } else if (type == "rick") {
-        newAudioElmt.setAttribute("src", "./sounds/rickroll.mp3");
-    }
-
-    // Automatically remove the audio element when it has fully played
-    newAudioElmt.addEventListener("ended", () => {
-        document.body.removeChild(newAudioElmt);
-    });
-
-    document.body.appendChild(newAudioElmt);
-    newAudioElmt.play();
-}
-
 function throwNewFartElement(innerTxt) {
-    console.log("throw new fart element with innertxt:", innerTxt);
-
-    let theta = getRandomInt(0,360);
+    let theta = getRandomFloat(0, 360);
     let thetaRadiant = theta * Math.PI/180; // Math.sin and Math.cos expect radiant, not degrees
     let radius = getRandomInt(300, 500);
     let thetaEnd = theta + getRandomInt(-50, 50);
@@ -62,6 +25,7 @@ function throwNewFartElement(innerTxt) {
         }
     ];
 
+    // Slightly turn the element on itself from its base rotation angle to another random angle from -50° to +50°
     const animTwo = [
         {
             transform: "translateX(-50%) translateY(-50%) rotate(" + theta + "deg)"
@@ -105,13 +69,14 @@ function throwNewFartElement(innerTxt) {
 }
 
 let totalFartCount = +localStorage.getItem("totalFartCount") || 0;
+let totalSubstancialFarts = 0;
 let nextLolTriggerCounter = 0;
 let randomizeLolTrigger = 42;
+let youShatYourself = false;
 
 const theFartButtonContainerElmt = document.getElementById("button-position");
 const theFartButtonElmt = document.getElementById("the-fart-button");
 const fartCounterSpan = document.getElementById("total-fart-counter");
-const expValueSpan = document.getElementById("exp-value-container");
 const fartLoaderProgressBar = document.getElementById("fart-loader-progress-bar");
 const scene = document.getElementById("scene");
 
@@ -121,31 +86,27 @@ setNewRandomizeLolTrigger();
 
 
 let longMousePress = false;
-let cancelClickEvent = false;
 let currentTimeOut;
 let fartOverloadTimeout;
 let currentFartValue = 0;
 
-function handleClickEventOnFartButton() {
-    console.log("Click event is now handle");
-    theFartButtonElmt.addEventListener("click", clickEventOnFartButtonCallback);
-}
+// Handling the event in a separate function to be able to call removeEventListener
+theFartButtonElmt.addEventListener("click", clickEventOnFartButtonCallback);
 
 function clickEventOnFartButtonCallback() {
-    console.log("Click event! Will handle? ", !longMousePress);
     if(longMousePress) {
         longMousePress = false;
         return;
-    } 
+    }
 
     let logText = "*prout*";
 
-    if (nextLolTriggerCounter == randomizeLolTrigger) {
+    if (nextLolTriggerCounter === randomizeLolTrigger) {
         logText = "lol";
         nextLolTriggerCounter = 0;
         setNewRandomizeLolTrigger();
     } else {
-        throwNewAudioElement();
+        playSound("fart");
         nextLolTriggerCounter++;
         totalFartCount++;
         fartCounterSpan.innerText = totalFartCount;
@@ -155,58 +116,65 @@ function clickEventOnFartButtonCallback() {
     throwNewFartElement(logText);
 }
 
-handleClickEventOnFartButton();
-
 function handleMouseLongPress() {
-    console.log("handleMouseLongPress", currentFartValue);
     fartLoaderProgressBar.style.top = "100%";
     fartLoaderProgressBar.className = "";
 
-    let logText = "*prout*";
+    if (!youShatYourself) {
+        let logText = "*prout*";
 
-    if(currentFartValue > 50) {
-        console.log("currentFartValue > 50");
-
-        totalFartCount += Math.round(currentFartValue);
-        fartCounterSpan.innerText = totalFartCount;
-        localStorage.setItem("totalFartCount", +totalFartCount);
-
-        if (currentFartValue > 80) {
-            // Substancial fart
-            console.log("currentFartValue > 80, go for substancial");
-            logText = "*substancial fart*";
-            throwNewAudioElement("substancial");
-        } else {
-            console.log("Should be a big fart");
-            // big fart
-            logText = "*big fart*";
-            throwNewAudioElement("big");
-        }
-    } else {
-
-        // normal fart
-        if (nextLolTriggerCounter == randomizeLolTrigger) {
-            logText = "lol";
-            nextLolTriggerCounter = 0;
-            setNewRandomizeLolTrigger();
-        } else {
-            throwNewAudioElement();
-            nextLolTriggerCounter++;
-            totalFartCount++;
+        if(currentFartValue > 50) {
+            totalFartCount += Math.round(currentFartValue);
             fartCounterSpan.innerText = totalFartCount;
             localStorage.setItem("totalFartCount", +totalFartCount);
+
+            if (currentFartValue > 80) {
+                // Substancial fart
+                totalSubstancialFarts++;
+                logText = "*substancial fart*";
+                playSound("substancial");
+
+                if (totalSubstancialFarts >= 10) {
+                    setTimeout(() => {
+                        // police du prout
+                        document.body.className = "fart-police";
+                        playSound("police");
+                        
+                        setTimeout(() => {
+                            document.body.className = "no-fart-police";
+                            gameOverContainer.className = "show";
+                            gameOverContainer.getElementsByTagName("h2")[0].innerText = "Too many loud farts. Wasted by the Fart Police."
+                            handleClickOnNewGame();
+                        }, 3000);
+                    }, 2000);
+                }
+            } else {
+                // big fart
+                logText = "*big fart*";
+                playSound("big");
+            }
+        } else {
+            // normal fart
+            if (nextLolTriggerCounter == randomizeLolTrigger) {
+                logText = "lol";
+                nextLolTriggerCounter = 0;
+                setNewRandomizeLolTrigger();
+            } else {
+                playSound("fart");
+                nextLolTriggerCounter++;
+                totalFartCount++;
+                fartCounterSpan.innerText = totalFartCount;
+                localStorage.setItem("totalFartCount", +totalFartCount);
+            }
         }
+
+        throwNewFartElement(logText);
+
+        currentFartValue = 0;
     }
-
-    console.log("Logtext there bro:", logText);
-    throwNewFartElement(logText);
-
-    currentFartValue = 0;
 }
 
 theFartButtonElmt.addEventListener("mousedown", () => {
-    console.log("Mouse down event");
-
     // Wait 400ms before considering the mousedown
     currentTimeOut = setTimeout(() => {
         longMousePress = true;
@@ -220,7 +188,6 @@ theFartButtonElmt.addEventListener("mouseleave", () => {
 
     if (longMousePress) {
         longMousePress = false;
-        console.log("mouseleave");
         handleMouseLongPress();
     }
 });
@@ -230,7 +197,6 @@ theFartButtonElmt.addEventListener("mouseup", () => {
     clearTimeout(fartOverloadTimeout);
 
     if (longMousePress) {
-        console.log("mouseup");
         setTimeout(handleMouseLongPress, 0)
     }
 });
@@ -249,38 +215,69 @@ function mouseDownHandler(currentValue = 0) {
         clearTimeout(currentTimeOut);
 
         fartOverloadTimeout = setTimeout(() => {
-            throwNewAudioElement("diarrhea");
-            scene.innerHTML = `<div class="poop">
+            youShatYourself = true;
+            playSound("diarrhea");
 
+            const poopElement = document.createElement("div");
+            poopElement.className = "poop";
+            poopElement.innerHTML = `
                 <div class="poop-layer layer-1"></div>
                 <div class="poop-layer layer-2"></div>
                 <div class="poop-layer layer-3"></div>
-                <div class="poop-layer layer-4"></div>
+                <div class="poop-layer layer-4"></div>`;
 
-            </div>`;
+            scene.appendChild(poopElement);
 
             let listPoop = document.getElementsByClassName("poop-layer");
 
             setTimeout(() => {
                 for (let i = 0; i < listPoop.length; i++) {
                     let currentPoopLayer = listPoop[i];
-                    console.log(`Poop ${i}`, currentPoopLayer);
 
-                    currentPoopLayer.addEventListener("click", (evt) => {
-                        evt.stopPropagation();
-                        console.log(evt.target);
-                    }, false);
+                    currentPoopLayer.addEventListener("click", handleClickOnTheShit, false);
                 }
             }, 0);
-        }, 500)
+
+            setTimeout(() => {
+                setTimeout(() => {
+                    scene.removeChild(poopElement);
+                    youShatYourself = false;
+                }, 400);
+                 
+                gameOverContainer.className = "show";
+                gameOverContainer.getElementsByTagName("h2")[0].innerText = "Fart overload, you shat yourself."
+                handleClickOnNewGame();
+            }, 30000);
+        }, 400);
     } else {
         currentTimeOut = setTimeout(() => {
             mouseDownHandler(currentValue);
         }, 10)
     }
 
-    expValueSpan.innerText = currentFartValue;
     fartLoaderProgressBar.style.top = 100 - currentFartValue + "%";
+}
+
+function handleClickOnTheShit(evt) {
+    evt.stopPropagation();
+    console.log(evt, evt.target);
+    let cx = evt.clientX;
+    let cy = evt.clientY;
+
+    let dot = document.createElement("div");
+    dot.className = "red-dot";
+    dot.style = `
+    z-index: 300;
+        border-radius: 50px;
+            width: 50px; 
+            height: 50px; 
+            background-color: red; 
+            position:absolute;
+            top:${cy}px;
+            left:${cx}px;
+            transform: translate(-50%, -50%)`;
+    document.body.appendChild(dot);
+    dot.addEventListener("click", handleClickOnTheShit, false);
 }
 
 // Konami Code
@@ -289,10 +286,28 @@ const konamiHandler = new Konami(() => {
     konamiHandler.unload();
     console.log('Konami thrown and unloaded');
     rickElement.className = "show";
-    throwNewAudioElement("rick");
+    playSound("rick");
     setTimeout(() => {
         konamiHandler.load()
         rickElement.className = "hide";
-        console.log('Konami reloaded');
+
+        gameOverContainer.className = "show";
+        gameOverContainer.getElementsByTagName("h2")[0].innerText = "You've been RickRolled."
+        handleClickOnNewGame();
     }, 22000);
 })
+
+const gameOverContainer = document.getElementById("game-over");
+// Handling click on any new game button
+const newGameButtonList = document.getElementsByClassName("new-game-button");
+// @TODO this method shall not allow the garbage collector to destroy a new-game-button element when removed from the DOM
+// --> should remove the event handler at some point
+function handleClickOnNewGame() {
+    for (const newGameButton of newGameButtonList) {
+        newGameButton.addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            console.log("New game bro", evt.target);
+            gameOverContainer.className = "hide";
+        })
+    }
+}
